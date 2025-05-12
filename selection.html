@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sélection ligne</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 2em;
+    }
+    select, button {
+      font-size: 1.2em;
+      padding: 0.6em;
+      margin: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sélectionnez une ligne et un arrêt</h1>
+
+  <select id="ligne">
+    <option value="L1">Ligne 1</option>
+    <option value="L2">Ligne 2</option>
+    <option value="L3">Ligne 3</option>
+    <option value="L4">Ligne 4</option>
+  </select>
+
+  <select id="stop">
+    <option value="Campus Alan Turing">Campus Alan Turing</option>
+    <option value="Gare Centrale">Gare Centrale</option>
+    <option value="Aéroport">Aéroport</option>
+    <option value="Campus Marthe Gautier">Campus Marthe Gautier</option>
+    <option value="Gare de l'Est">Gare de l'Est</option>
+  </select>
+
+  <br>
+  <button onclick="afficher()">Afficher</button>
+
+  <script>
+    function afficher() {
+      const ligne = document.getElementById("ligne").value;
+      const stop = document.getElementById("stop").value;
+      window.location.href = `affichage.html?ligne=${ligne}&stop=${encodeURIComponent(stop)}`;
+    }
+  </script>
+</body>
+</html>

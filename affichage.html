@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Affichage en temps réel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script defer src="js/script.js"></script>
+  <style>
+    body {
+      background: #000;
+      color: #f2ff00;
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      padding: 2em;
+    }
+
+    .logo {
+      height: 80px;
+      margin-bottom: 1em;
+    }
+
+    h1, h2 {
+      margin: 0.5em 0;
+      color: white;
+    }
+
+    .temps {
+      font-size: 6em;
+      margin-top: 0.4em;
+    }
+
+    .autres {
+      margin-top: 3em;
+      color: #aaa;
+    }
+
+    .perturbations {
+      margin-top: 2em;
+      background: #ff4444;
+      color: white;
+      padding: 1em;
+      border-radius: 10px;
+      font-size: 1.2em;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="contenu">
+    <img id="logo" class="logo" src="" alt="Logo ligne">
+    <h1 id="station"></h1>
+    <h2 id="destination"></h2>
+    <div class="temps" id="temps">...</div>
+
+    <div class="perturbations" id="perturbation" style="display: none;"></div>
+
+    <div class="autres" id="autresLignes"></div>
+  </div>
+
+  <div class="hidden" style="display:none;">
+    <!-- Emplacements pour script.js -->
+    <span class="time" data-line="L1" data-stop="Campus Alan Turing"></span>
+    <span class="time" data-line="L1" data-stop="Gare Centrale"></span>
+    <span class="time" data-line="L2" data-stop="Aéroport"></span>
+    <span class="time" data-line="L2" data-stop="Gare Centrale"></span>
+    <span class="time" data-line="L3" data-stop="Campus Marthe Gautier"></span>
+    <span class="time" data-line="L3" data-stop="Gare Centrale"></span>
+    <span class="time" data-line="L4" data-stop="Gare de l'Est"></span>
+    <span class="time" data-line="L4" data-stop="Gare Centrale"></span>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const ligne = params.get("ligne");
+    const stop = params.get("stop");
+
+    document.getElementById("logo").src = `img/${ligne}.png`;
+    document.getElementById("station").textContent = stop;
+    document.getElementById("destination").textContent = "Vers destination..."; // à ajuster si besoin
+
+    function updateAffichage() {
+      const tempsEl = document.querySelector(`.time[data-line="${ligne}"][data-stop="${stop}"]`);
+      document.getElementById("temps").textContent = tempsEl ? tempsEl.textContent : "–";
+
+      // autres lignes au même arrêt
+      const autres = Array.from(document.querySelectorAll(`.time[data-stop="${stop}"]`))
+        .filter(el => el.dataset.line !== ligne);
+      if (autres.length) {
+        document.getElementById("autresLignes").innerHTML = "<h2>Autres lignes ici</h2>" + autres.map(el =>
+          `<p><strong>${el.dataset.line}</strong> → ${el.textContent}</p>`
+        ).join("");
+      }
+    }
+
+    const observer = new MutationObserver(updateAffichage);
+    document.querySelectorAll(".time").forEach(el =>
+      observer.observe(el, { childList: true })
+    );
+
+    updateAffichage();
+
+    // Perturbations
+    const perturbations = JSON.parse(localStorage.getItem("perturbations") || "{}");
+    if (perturbations[ligne]) {
+      const box = document.getElementById("perturbation");
+      box.textContent = `Perturbation sur ${ligne} : ${perturbations[ligne]}`;
+      box.style.display = "block";
+    }
+  </script>
+</body>
+</html>

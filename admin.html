@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin – Perturbations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 2em;
+      text-align: center;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin-top: 1em;
+    }
+    #admin-panel {
+      display: none;
+      margin-top: 2em;
+    }
+    input, button, select {
+      font-size: 1em;
+      padding: 0.5em;
+      margin: 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <h2>Zone d'administration sécurisée</h2>
+
+  <div id="login">
+    <input type="password" id="pass" placeholder="Mot de passe" />
+    <button onclick="verifPass()">Connexion</button>
+  </div>
+
+  <div id="admin-panel">
+    <p>Modifier les perturbations par ligne</p>
+    <select id="ligne" onchange="chargerPerturbation()">
+      <option value="L1">Ligne 1</option>
+      <option value="L2">Ligne 2</option>
+      <option value="L3">Ligne 3</option>
+      <option value="L4">Ligne 4</option>
+    </select>
+    <br>
+    <textarea id="texte" placeholder="Entrez une perturbation ici..."></textarea>
+    <br>
+    <button onclick="enregistrer()">Enregistrer</button>
+  </div>
+
+  <script>
+    const motDePasseHash = "1d66e36db32800faed54b0c0bb53a885"; // md5("supersecret")
+    let perturbations = {};
+
+    function verifPass() {
+      const pass = document.getElementById("pass").value;
+      const hash = CryptoJS.MD5(pass).toString();
+      if (hash === motDePasseHash) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("admin-panel").style.display = "block";
+        fetchPerturbations();
+      } else {
+        alert("Mot de passe incorrect");
+      }
+    }
+
+    function fetchPerturbations() {
+      fetch("perturbations.json")
+        .then(res => res.json())
+        .then(data => {
+          perturbations = data;
+          chargerPerturbation();
+        });
+    }
+
+    function chargerPerturbation() {
+      const ligne = document.getElementById("ligne").value;
+      document.getElementById("texte").value = perturbations[ligne] || "";
+    }
+
+    function enregistrer() {
+      const ligne = document.getElementById("ligne").value;
+      const texte = document.getElementById("texte").value;
+      perturbations[ligne] = texte;
+
+      fetch("update_perturbations.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(perturbations)
+      })
+      .then(res => res.text())
+      .then(msg => alert(msg))
+      .catch(err => alert("Erreur : " + err));
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</body>
+</html>
